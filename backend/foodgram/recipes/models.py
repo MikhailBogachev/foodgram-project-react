@@ -21,11 +21,12 @@ class Tag(models.Model):
 
 
 class Ingredient(models.Model):
+    """Ингредиенты"""
     name=models.CharField(
         max_length=100,
         verbose_name='Название ингридиента'
     )
-    unit=models.CharField(
+    measurement_unit=models.CharField(
         max_length=20,
         verbose_name='Единица измерения'
     )
@@ -35,7 +36,7 @@ class Recipe(models.Model):
     """Рецепты"""
     auhtor=models.ForeignKey(
         User,
-        on_delete=models.SET_NULL,
+        on_delete=models.CASCADE,
         related_name='recipes'
     )
     name=models.CharField(
@@ -60,6 +61,7 @@ class Recipe(models.Model):
 
 
 class RecipeIngredients(models.Model):
+    """Ингредиенты для рецептов с количеством"""
     recipe=models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
