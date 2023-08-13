@@ -34,7 +34,7 @@ class Ingredient(models.Model):
 
 class Recipe(models.Model):
     """Рецепты"""
-    auhtor=models.ForeignKey(
+    author=models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         related_name='recipes'
@@ -48,10 +48,12 @@ class Recipe(models.Model):
         null=True,
         blank=True
     )
-    description=models.TextField()
-    # ingredients=models.CharField(
-    #     max_length=100
-    # )
+    text=models.TextField()
+    ingredients=models.ManyToManyField(
+        Ingredient,
+        through="RecipeIngredients",
+        related_name='recipes'
+    )
     tags=models.ManyToManyField(
         Tag,
         verbose_name='Тег рецепта',
@@ -65,11 +67,11 @@ class RecipeIngredients(models.Model):
     recipe=models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        related_name='recipe'
+        related_name='ingredient'
     )
     ingredient=models.ForeignKey(
         Ingredient,
         on_delete=models.CASCADE,
-        related_name='ingredient'
+        related_name='recipe'
     )
-    ingredient_count=models.IntegerField()
+    amount=models.IntegerField()
