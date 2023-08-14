@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth import get_user_model
+from PIL import Image
 
 
 User = get_user_model()
@@ -7,22 +8,22 @@ User = get_user_model()
 
 class Tag(models.Model):
     """Теги"""
-    name=models.CharField(
+    name = models.CharField(
         max_length=100,
         verbose_name='Тег'
     )
-    hex_code=models.CharField(
+    hex_code = models.CharField(
         max_length=10,
         verbose_name='Цветовой HEX-код'
     )
-    slug=models.SlugField(
+    slug = models.SlugField(
         unique=True
     )
 
 
 class Ingredient(models.Model):
     """Ингредиенты"""
-    name=models.CharField(
+    name = models.CharField(
         max_length=100,
         verbose_name='Название ингридиента'
     )
@@ -34,44 +35,72 @@ class Ingredient(models.Model):
 
 class Recipe(models.Model):
     """Рецепты"""
-    author=models.ForeignKey(
+    author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         related_name='recipes'
     )
-    name=models.CharField(
+    name = models.CharField(
         max_length=100,
         verbose_name='Название'
     )
-    image=models.ImageField(
+    image = models.ImageField(
         upload_to='recipes/',
         null=True,
         blank=True
     )
-    text=models.TextField()
-    ingredients=models.ManyToManyField(
+    text = models.TextField()
+    ingredients = models.ManyToManyField(
         Ingredient,
         through="RecipeIngredients",
         related_name='recipes'
     )
-    tags=models.ManyToManyField(
+    tags = models.ManyToManyField(
         Tag,
         verbose_name='Тег рецепта',
         related_name='recipes'
     )
-    cooking_time=models.IntegerField()
+    cooking_time = models.IntegerField()
+
+    def save(self, *args, **kwargs) -> None:
+        super().save(*args, **kwargs)
+        image = Image.open(self.image.path)
+        # image.thumbnail(Tuples.RECIPE_IMAGE_SIZE)
+        image.save(self.image.path)
 
 
 class RecipeIngredients(models.Model):
     """Ингредиенты для рецептов с количеством"""
-    recipe=models.ForeignKey(
+    recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
         related_name='ingredient'
     )
-    ingredient=models.ForeignKey(
+    ingredient = models.ForeignKey(
         Ingredient,
         on_delete=models.CASCADE,
         related_name='recipe'
     )
-    amount=models.IntegerField()
+    amount = models.IntegerField()
+
+
+class FavoriteRecipe(models.Model):
+    """Избранные рецепты"""
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='favorites'
+    )
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        related_name='in_favorites'
+    )
+    class Meta:
+        verbose_name = 'Избранный рецепт'
+        verbose_name_plural = 'Избранные рецепты'
+        constraints = (
+            models.UniqueConstraint(
+                fields=('recipe', 'user'),
+                name='unique favorites'),
+        )
