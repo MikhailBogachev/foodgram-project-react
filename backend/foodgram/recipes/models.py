@@ -104,3 +104,16 @@ class FavoriteRecipe(models.Model):
                 fields=('recipe', 'user'),
                 name='unique favorites'),
         )
+
+class ShoppingCart(models.Model):
+    """Корзина покупок"""
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='carts'
+    )
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        related_name='in_carts'
+    )

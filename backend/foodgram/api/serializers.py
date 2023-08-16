@@ -29,6 +29,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     image = Base64ImageField()
     ingredients = serializers.SerializerMethodField()
     is_favorited = serializers.SerializerMethodField()
+    is_in_shopping_cart = serializers.SerializerMethodField()
 
     def get_ingredients(self, recipe: Recipe) -> QuerySet[dict]:
         """Получает список ингридиентов для рецепта.
@@ -58,6 +59,21 @@ class RecipeSerializer(serializers.ModelSerializer):
         if user.is_anonymous:
             return False
         return user.favorites.filter(recipe=recipe).exists()
+    
+    def get_is_in_shopping_cart(self, recipe: Recipe) -> bool:
+        """Получает флаг рецепта в списке покупок
+
+        Args:
+            recipe (Recipe): Рецепт.
+
+        Returns:
+            (bool): True - в списке покупок, False - нет
+        """
+        user = self.context.get("view").request.user
+
+        if user.is_anonymous:
+            return False
+        return user.carts.filter(recipe=recipe).exists()
     
     def validate(self, data: OrderedDict) -> dict:
         """Валидация полученных данных о рецепте.
@@ -114,7 +130,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Recipe
-        fields = ('id', 'tags', 'name', 'image', 'text', 'cooking_time', 'ingredients', 'author', 'is_favorited')
+        fields = ('id', 'tags', 'name', 'image', 'text', 'cooking_time', 'ingredients', 'author', 'is_favorited', 'is_in_shopping_cart')
 
 
 class ShortRecipeSerializer(serializers.ModelSerializer):
