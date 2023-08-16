@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.db.models import Q
 from rest_framework import viewsets, filters
 from rest_framework.decorators import action
@@ -30,6 +32,27 @@ class RecipeViewSet(viewsets.ModelViewSet, AddOrDeleteRelationForUserViewMixin):
     queryset =  Recipe.objects.all()
     serializer_class = RecipeSerializer
     relation_serializer = ShortRecipeSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        queryset = self.queryset
+
+        author_id = self.request.query_params.get('author')
+        list_tags = self.request.query_params.getlist('tags')
+        is_favorited = self.request.query_params.get('is_favorited')
+        is_in_shopping_cart = self.request.query_params.get('is_in_shopping_cart')
+
+        if author_id:
+            queryset = queryset.filter(author=author_id)
+        if list_tags:
+            queryset = queryset.filter(tags__slug__in=list_tags)
+        if user.is_anonymous:
+            return queryset
+        if is_favorited == '1':
+            queryset = queryset.filter(in_favorites__user=user)
+        if is_in_shopping_cart == '1':
+            queryset = queryset.filter(in_carts__user=user)
+        return queryset
     
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
@@ -72,11 +95,7 @@ class RecipeViewSet(viewsets.ModelViewSet, AddOrDeleteRelationForUserViewMixin):
     @action(methods=("get",), detail=False)
     def download_shopping_cart(self, request) -> Response:
         """Получить список покупок."""
-        user = self.request.user
-        filename = f"{user.username}_shopping_list.txt"
-        shopping_cart = get_shoping_cart(user)
-        response = HttpResponse(
-            shopping_cart, content_type="text.txt; charset=utf-8"
+        return HttpResponse(
+            get_shoping_cart(self.request.user),
+            content_type="text.txt; charset=utf-8"
         )
-        response["Content-Disposition"] = f"attachment; filename={filename}"
-        return response

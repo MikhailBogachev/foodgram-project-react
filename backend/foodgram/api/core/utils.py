@@ -32,5 +32,5 @@ def get_shoping_cart(user: User) -> str:
     )
     shopping_list.extend(ingredients_list)
     shopping_list.append('\nПриятных покупок!')
-    shopping_list.append('Ваш Foodram.')
+    shopping_list.append('Ваш Foodgram.')
     return "\n".join(shopping_list)
