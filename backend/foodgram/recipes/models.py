@@ -20,6 +20,13 @@ class Tag(models.Model):
         unique=True
     )
 
+    class Meta:
+        verbose_name = 'Тег'
+        verbose_name_plural = 'Теги'
+
+    def __str__(self):
+        return self.name
+
 
 class Ingredient(models.Model):
     """Ингредиенты"""
@@ -31,6 +38,13 @@ class Ingredient(models.Model):
         max_length=20,
         verbose_name='Единица измерения'
     )
+
+    class Meta:
+        verbose_name = 'Ингредиент'
+        verbose_name_plural = 'Ингредиенты'
+
+    def __str__(self):
+        return f'{self.name}, {self.measurement_unit}'
 
 
 class Recipe(models.Model):
@@ -62,12 +76,18 @@ class Recipe(models.Model):
     )
     cooking_time = models.IntegerField()
 
-    def save(self, *args, **kwargs) -> None:
-        super().save(*args, **kwargs)
-        image = Image.open(self.image.path)
-        # image.thumbnail(Tuples.RECIPE_IMAGE_SIZE)
-        image.save(self.image.path)
+    # def save(self, *args, **kwargs) -> None:
+    #     super().save(*args, **kwargs)
+    #     image = Image.open(self.image.path)
+    #     image.thumbnail(Tuples.RECIPE_IMAGE_SIZE)
+    #     image.save(self.image.path)
 
+    class Meta:
+        verbose_name = 'Рецепт'
+        verbose_name_plural = 'Рецепты'
+
+    def __str__(self):
+        return self.name
 
 class RecipeIngredients(models.Model):
     """Ингредиенты для рецептов с количеством"""
@@ -82,6 +102,13 @@ class RecipeIngredients(models.Model):
         related_name='recipe'
     )
     amount = models.IntegerField()
+
+    class Meta:
+        verbose_name = 'Ингредиенты рецепта'
+        verbose_name_plural = 'Ингредиенты рецепта'
+
+    def __str__(self) -> str:
+        return f"{self.amount} {self.ingredient}"
 
 
 class FavoriteRecipe(models.Model):
@@ -104,6 +131,10 @@ class FavoriteRecipe(models.Model):
                 fields=('recipe', 'user'),
                 name='unique favorites'),
         )
+    
+    def __str__(self):
+        return f'{self.user.username} - {self.recipe.name}'
+
 
 class ShoppingCart(models.Model):
     """Корзина покупок"""
@@ -117,3 +148,10 @@ class ShoppingCart(models.Model):
         on_delete=models.CASCADE,
         related_name='in_carts'
     )
+    
+    class Meta:
+        verbose_name = 'Корзина покупок'
+        verbose_name_plural = 'Корзина покупок'
+
+    def __str__(self):
+        return f'{self.user.username} - {self.recipe.name}'

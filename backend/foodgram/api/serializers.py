@@ -4,8 +4,12 @@ from rest_framework import serializers
 from django.db.models import F, QuerySet
 from django.core.exceptions import ValidationError
 from drf_extra_fields.fields import Base64ImageField
+from django.contrib.auth import get_user_model
 
 from recipes.models import Tag, Ingredient, Recipe, RecipeIngredients
+
+
+User = get_user_model()
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -22,10 +26,55 @@ class IngredientSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class UserSerializer(serializers.ModelSerializer):
+    """Сериализатор пользователей"""
+    is_subscribed = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = (
+            "email",
+            "id",
+            "username",
+            "first_name",
+            "last_name",
+            "is_subscribed",
+            "password",
+        )
+        extra_kwargs = {"password": {"write_only": True}}
+        read_only_fields = ("is_subscribed",)
+
+    def create(self, validated_data: dict) -> User:
+        """Создаёт нового пользователя с запрошенными полями."""
+        user = User(
+            email=validated_data["email"],
+            username=validated_data["username"],
+            first_name=validated_data["first_name"],
+            last_name=validated_data["last_name"],
+        )
+        user.set_password(validated_data["password"])
+        user.save()
+        return user
+
+    def get_is_subscribed(self, author: User) -> bool:
+        """Получает флаг подписки на автора.
+
+        Args:
+            user (User): Автор.
+
+        Returns:
+            bool: True - подписка есть, False - нет.
+        """
+        user = self.context.get('view').request.user
+        if user.is_anonymous or user == author:
+            return False
+        return True
+    
+
 class RecipeSerializer(serializers.ModelSerializer):
     """Сериализатор рецептов"""
-    author = serializers.SlugRelatedField(read_only=True, slug_field='username')
-    tags = serializers.SlugRelatedField(queryset=Tag.objects.all(), slug_field='id', many=True)
+    author = UserSerializer(read_only=True)
+    tags = TagSerializer(many=True, read_only=True)
     image = Base64ImageField()
     ingredients = serializers.SerializerMethodField()
     is_favorited = serializers.SerializerMethodField()
@@ -41,7 +90,7 @@ class RecipeSerializer(serializers.ModelSerializer):
             QuerySet[dict]: Список ингридиентов и их количество в рецепте.
         """
         ingredients = recipe.ingredients.values(
-            "id", "name", "measurement_unit", amount=F("recipe__amount")
+            'id', 'name', 'measurement_unit', amount=F('recipe__amount')
         )
         return ingredients
 
@@ -54,7 +103,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         Returns:
             (bool): True - избранный, False - нет
         """
-        user = self.context.get("view").request.user
+        user = self.context.get('view').request.user
 
         if user.is_anonymous:
             return False
@@ -69,7 +118,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         Returns:
             (bool): True - в списке покупок, False - нет
         """
-        user = self.context.get("view").request.user
+        user = self.context.get('view').request.user
 
         if user.is_anonymous:
             return False
@@ -91,26 +140,26 @@ class RecipeSerializer(serializers.ModelSerializer):
         ingredients: list[dict[str, int]] = self.initial_data.get('ingredients')
 
         if not tags or not ingredients:
-            raise ValidationError("Отсутствуют теги и/или ингредиенты")
+            raise ValidationError('Отсутствуют теги и/или ингредиенты')
         
         existing_tags = Tag.objects.filter(id__in=tags)
         if len(tags) != len(existing_tags):
-            raise ValidationError("Такой тег не существует")
+            raise ValidationError('Такой тег не существует')
 
         ingredients_tmp = {}
         for ing in ingredients:
             if ing['amount'] < 1:
-                raise ValidationError("Кол-во ингредиента не может быть меньше 1")
+                raise ValidationError('Кол-во ингредиента не может быть меньше 1')
             ingredients_tmp[ing['id']] = ing['amount']
         existing_ingredients = Ingredient.objects.filter(id__in=ingredients_tmp.keys())
         if len(ingredients_tmp) != len(existing_ingredients):
-            raise ValidationError("Такого ингредиента не существует")
+            raise ValidationError('Такого ингредиента не существует')
         for ing in existing_ingredients:
             ingredients_tmp[ing.pk] = (ing, ingredients_tmp[ing.pk])
         data.update(
             {
-                "tags": existing_tags,
-                "ingredients": ingredients_tmp,
+                'tags': existing_tags,
+                'ingredients': ingredients_tmp,
             }
         )
         return data
@@ -133,11 +182,54 @@ class RecipeSerializer(serializers.ModelSerializer):
         fields = ('id', 'tags', 'name', 'image', 'text', 'cooking_time', 'ingredients', 'author', 'is_favorited', 'is_in_shopping_cart')
 
 
-class ShortRecipeSerializer(serializers.ModelSerializer):
+class ReadRecipeSerializer(serializers.ModelSerializer):
     """Сериализатор для модели Recipe.
     Определён укороченный набор полей для некоторых эндпоинтов.
     """
     class Meta:
         model = Recipe
-        fields = "id", "name", "image", "cooking_time"
+        fields = 'id', 'name', 'image', 'cooking_time'
+        read_only_fields = ('__all__',)
+
+
+class FollowSerializer(UserSerializer):
+    """Сериализатор подписок"""
+
+    recipes = ReadRecipeSerializer(many=True, read_only=True)
+    recipes_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = (
+            "email",
+            "id",
+            "username",
+            "first_name",
+            "last_name",
+            "is_subscribed",
+            "recipes",
+            "recipes_count",
+        )
         read_only_fields = ("__all__",)
+
+    def get_is_subscribed(*args) -> bool:
+        """Проверка подписки пользователей.
+
+        Переопределённый метод родительского класса для уменьшения нагрузки,
+        так как в текущей реализации всегда вернёт `True`.
+
+        Returns:
+            bool: True
+        """
+        return True
+
+    def get_recipes_count(self, author: User) -> int:
+        """Получить кол-во рецептов автора.
+
+        Args:
+            obj (User): Автор.
+
+        Returns:
+            int: Количество рецептов автора.
+        """
+        return author.recipes.count()

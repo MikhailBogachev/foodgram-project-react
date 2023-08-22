@@ -24,9 +24,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'users.apps.UsersConfig',
     'api.apps.ApiConfig',
     'recipes.apps.RecipesConfig',
-
+    "rest_framework",
+    "rest_framework.authtoken",
+    "djoser",
+    
 ]
 
 MIDDLEWARE = [
@@ -116,12 +120,44 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
 STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'static'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
-MEDIA_URL = 'media/'
-MEDIA_ROOT = BASE_DIR / MEDIA_URL
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# User model
+
+AUTH_USER_MODEL = 'users.User'
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.TokenAuthentication',
+    ),
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticatedOrReadOnly",
+    ],
+    # 'DEFAULT_PAGINATION_CLASS': 'api.paginators.PageLimitPagination',
+    # 'PAGE_SIZE': 10
+}
+
+DJOSER = {
+    "LOGIN_FIELD": "email",
+    "HIDE_USERS": False,
+    "SERIALIZERS": {
+        "user": "api.serializers.UserSerializer",
+        "user_list": "api.serializers.UserSerializer",
+        "current_user": "api.serializers.UserSerializer",
+        "user_create": "api.serializers.UserSerializer",
+    },
+    # "PERMISSIONS": {
+    #     "recipe": ("api.permissions.IsAuthorOrReadOnly,",),
+    #     "recipe_list": ("api.permissions.IsAuthorOrReadOnly",),
+    #     "user": ("api.permissions.OwnerUserOrReadOnly",),
+    #     "user_list": ("api.permissions.OwnerUserOrReadOnly",),
+    # },
+}
