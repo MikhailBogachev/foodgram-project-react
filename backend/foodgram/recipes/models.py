@@ -1,6 +1,5 @@
 from django.db import models
 from django.contrib.auth import get_user_model
-from PIL import Image
 
 
 User = get_user_model()
@@ -34,7 +33,7 @@ class Ingredient(models.Model):
         max_length=100,
         verbose_name='Название ингридиента'
     )
-    measurement_unit=models.CharField(
+    measurement_unit = models.CharField(
         max_length=20,
         verbose_name='Единица измерения'
     )
@@ -52,7 +51,8 @@ class Recipe(models.Model):
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='recipes'
+        related_name='recipes',
+        verbose_name='Автор'
     )
     name = models.CharField(
         max_length=100,
@@ -75,19 +75,20 @@ class Recipe(models.Model):
         related_name='recipes'
     )
     cooking_time = models.IntegerField()
-
-    # def save(self, *args, **kwargs) -> None:
-    #     super().save(*args, **kwargs)
-    #     image = Image.open(self.image.path)
-    #     image.thumbnail(Tuples.RECIPE_IMAGE_SIZE)
-    #     image.save(self.image.path)
+    pub_date = models.DateTimeField(
+        verbose_name="Дата публикации",
+        auto_now_add=True,
+        editable=False,
+    )
 
     class Meta:
         verbose_name = 'Рецепт'
         verbose_name_plural = 'Рецепты'
+        ordering = ("-pub_date",)
 
     def __str__(self):
         return self.name
+
 
 class RecipeIngredients(models.Model):
     """Ингредиенты для рецептов с количеством"""
@@ -123,6 +124,7 @@ class FavoriteRecipe(models.Model):
         on_delete=models.CASCADE,
         related_name='in_favorites'
     )
+
     class Meta:
         verbose_name = 'Избранный рецепт'
         verbose_name_plural = 'Избранные рецепты'
@@ -131,7 +133,7 @@ class FavoriteRecipe(models.Model):
                 fields=('recipe', 'user'),
                 name='unique favorites'),
         )
-    
+
     def __str__(self):
         return f'{self.user.username} - {self.recipe.name}'
 
@@ -148,7 +150,7 @@ class ShoppingCart(models.Model):
         on_delete=models.CASCADE,
         related_name='in_carts'
     )
-    
+
     class Meta:
         verbose_name = 'Корзина покупок'
         verbose_name_plural = 'Корзина покупок'

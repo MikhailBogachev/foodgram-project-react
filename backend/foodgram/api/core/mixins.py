@@ -1,5 +1,3 @@
-from typing import Union
-
 from django.db.models import Model, Q
 from django.db.utils import IntegrityError
 from django.shortcuts import get_object_or_404
@@ -25,7 +23,7 @@ class AddOrDeleteRelationForUserViewMixin:
             entry.save()
         except IntegrityError:
             return Response(
-                data={"error": f"Связь уже сущветвует"},
+                data={"error": "Связь уже сущветвует"},
                 status=HTTP_400_BAD_REQUEST,
             )
         serializer = self.relation_serializer(obj)
@@ -33,11 +31,13 @@ class AddOrDeleteRelationForUserViewMixin:
 
     def delete_relation(self, params: Q) -> Response:
         """Удаляет свзяь"""
-        obj = self.relation_model.objects.filter(params & Q(user=self.request.user))
+        obj = self.relation_model.objects.filter(
+            params & Q(user=self.request.user)
+        )
         status, _ = obj.delete()
         if not status:
             return Response(
-                data={"error": f"Связи не существует"},
+                data={"error": "Связи не существует"},
                 status=HTTP_400_BAD_REQUEST,
             )
         return Response(status=HTTP_204_NO_CONTENT)

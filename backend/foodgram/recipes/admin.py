@@ -23,31 +23,18 @@ class TagAdmin(admin.ModelAdmin):
     list_editable = ('name', 'hex_code', 'slug')
     empty_value_display = '-пусто-'
 
+
 class IngredientInline(admin.TabularInline):
     model = RecipeIngredients
     extra = 2
-# @admin.register(Recipe)
-# class RecipeAdmin(admin.ModelAdmin):
-#     list_display = (
-#         'name', 'cooking_time', 'text', 
-#         'tags', 'image', 'author'
-#     )
-#     list_editable = (
-#         'name', 'cooking_time', 'text', 'tags',
-#         'image', 'author'
-#     )
-#     readonly_fields = ('in_favorites',)
-#     list_filter = ('name', 'author', 'tags')
-#     empty_value_display = '-пусто-'
 
-#     @admin.display(description='В избранном')
-#     def in_favorites(self, obj):
-#         return obj.favorite_recipe.count()
+
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
     list_display = (
         "name",
         "author",
+        "count_favorites",
     )
     fields = (
         (
@@ -71,6 +58,12 @@ class RecipeAdmin(admin.ModelAdmin):
 
     inlines = (IngredientInline,)
     save_on_top = True
+
+    def count_favorites(self, obj: Recipe) -> int:
+        return obj.in_favorites.count()
+
+    count_favorites.short_description = "В избранном"
+
 
 @admin.register(RecipeIngredients)
 class RecipeIngredientAdmin(admin.ModelAdmin):

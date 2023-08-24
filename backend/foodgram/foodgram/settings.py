@@ -8,11 +8,20 @@ load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-m)3e1@a=^8!^=g2m7)sn0)lduuqhzvnpu6r+&iw-$6=y01h$1='
+SECRET_KEY = os.getenv(
+    'SECRET_KEY',
+    '8t6c^uvn^r@wmocz7^0rwia=lszy4p4sc2of6xw62tbl7und5_'
+)
 
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    'backend',
+    # '51.250.25.224',
+    'db'
+]
 
 
 # Application definition
@@ -30,7 +39,6 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework.authtoken",
     "djoser",
-    
 ]
 
 MIDDLEWARE = [
@@ -74,9 +82,9 @@ DATABASES = {
     # }
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": str(os.getenv('DB_NAME')),
-        "USER": str(os.getenv('DB_USER')),
-        "PASSWORD": str(os.getenv('DB_PASSWORD')),
+        "NAME": str(os.getenv('POSTGRES_DB')),
+        "USER": str(os.getenv('POSTGRES_USER')),
+        "PASSWORD": str(os.getenv('POSTGRES_PASSWORD')),
         "HOST": str(os.getenv('DB_HOST')),
         "PORT": str(os.getenv('DB_PORT')),
     }
@@ -141,8 +149,6 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticatedOrReadOnly",
     ],
-    # 'DEFAULT_PAGINATION_CLASS': 'api.paginators.PageLimitPagination',
-    # 'PAGE_SIZE': 10
 }
 
 DJOSER = {
@@ -154,10 +160,4 @@ DJOSER = {
         "current_user": "api.serializers.UserSerializer",
         "user_create": "api.serializers.UserSerializer",
     },
-    # "PERMISSIONS": {
-    #     "recipe": ("api.permissions.IsAuthorOrReadOnly,",),
-    #     "recipe_list": ("api.permissions.IsAuthorOrReadOnly",),
-    #     "user": ("api.permissions.OwnerUserOrReadOnly",),
-    #     "user_list": ("api.permissions.OwnerUserOrReadOnly",),
-    # },
 }

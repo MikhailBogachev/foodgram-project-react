@@ -7,6 +7,7 @@ from drf_extra_fields.fields import Base64ImageField
 from django.contrib.auth import get_user_model
 
 from recipes.models import Tag, Ingredient, Recipe, RecipeIngredients
+from users.models import Follow
 
 
 User = get_user_model()
@@ -65,11 +66,19 @@ class UserSerializer(serializers.ModelSerializer):
         Returns:
             bool: True - подписка есть, False - нет.
         """
-        user = self.context.get('view').request.user
-        if user.is_anonymous or user == author:
-            return False
-        return True
-    
+        # user = self.context.get('view').request.user
+        # if user.is_anonymous or user == author:
+        #     return False
+        # return True
+        print(self.context['request'].user)
+        if (self.context.get('request')
+           and not self.context['request'].user.is_anonymous):
+            return Follow.objects.filter(
+                user=self.context['request'].user,
+                following=author
+            ).exists()
+        return False
+
 
 class RecipeSerializer(serializers.ModelSerializer):
     """Сериализатор рецептов"""
@@ -108,7 +117,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         if user.is_anonymous:
             return False
         return user.favorites.filter(recipe=recipe).exists()
-    
+
     def get_is_in_shopping_cart(self, recipe: Recipe) -> bool:
         """Получает флаг рецепта в списке покупок
 
@@ -123,7 +132,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         if user.is_anonymous:
             return False
         return user.carts.filter(recipe=recipe).exists()
-    
+
     def validate(self, data: OrderedDict) -> dict:
         """Валидация полученных данных о рецепте.
 
@@ -137,21 +146,27 @@ class RecipeSerializer(serializers.ModelSerializer):
             ValidationError: Полученные данные не овтечают требованиям.
         """
         tags: list[int] = self.initial_data.get('tags')
-        ingredients: list[dict[str, int]] = self.initial_data.get('ingredients')
+        ingredients: list[dict[str, int]] = self.initial_data.get(
+            'ingredients'
+        )
 
         if not tags or not ingredients:
             raise ValidationError('Отсутствуют теги и/или ингредиенты')
-        
+
         existing_tags = Tag.objects.filter(id__in=tags)
         if len(tags) != len(existing_tags):
             raise ValidationError('Такой тег не существует')
 
         ingredients_tmp = {}
         for ing in ingredients:
-            if ing['amount'] < 1:
-                raise ValidationError('Кол-во ингредиента не может быть меньше 1')
+            if int(ing['amount']) < 1:
+                raise ValidationError(
+                    'Кол-во ингредиента не может быть меньше 1'
+                )
             ingredients_tmp[ing['id']] = ing['amount']
-        existing_ingredients = Ingredient.objects.filter(id__in=ingredients_tmp.keys())
+        existing_ingredients = Ingredient.objects.filter(
+            id__in=ingredients_tmp.keys()
+        )
         if len(ingredients_tmp) != len(existing_ingredients):
             raise ValidationError('Такого ингредиента не существует')
         for ing in existing_ingredients:
@@ -171,15 +186,20 @@ class RecipeSerializer(serializers.ModelSerializer):
         recipe.tags.set(tags_data)
         RecipeIngredients.objects.bulk_create(
             [
-                RecipeIngredients(recipe=recipe, ingredient=ingredient, amount=amount)
+                RecipeIngredients(
+                    recipe=recipe, ingredient=ingredient, amount=amount
+                )
                 for ingredient, amount in ingredients_data.values()
             ]
         )
         return recipe
-    
+
     class Meta:
         model = Recipe
-        fields = ('id', 'tags', 'name', 'image', 'text', 'cooking_time', 'ingredients', 'author', 'is_favorited', 'is_in_shopping_cart')
+        fields = (
+            'id', 'tags', 'name', 'image', 'text', 'cooking_time',
+            'ingredients', 'author', 'is_favorited', 'is_in_shopping_cart'
+        )
 
 
 class ReadRecipeSerializer(serializers.ModelSerializer):

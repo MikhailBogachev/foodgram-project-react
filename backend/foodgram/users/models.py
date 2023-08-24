@@ -17,6 +17,10 @@ class User(AbstractUser):
         max_length=150
     )
 
+    class Meta:
+        verbose_name = 'Пользователь'
+        verbose_name_plural = 'Пользователи'
+
 
 class Follow(models.Model):
     user = models.ForeignKey(
@@ -25,12 +29,14 @@ class Follow(models.Model):
         related_name='follower'
     )
     following = models.ForeignKey(
-        User, 
-        on_delete=models.CASCADE, 
+        User,
+        on_delete=models.CASCADE,
         related_name='following'
     )
 
     class Meta:
+        verbose_name = "Подписка"
+        verbose_name_plural = "Подписки"
         constraints = (
             models.UniqueConstraint(
                 fields=('user', 'following'),
