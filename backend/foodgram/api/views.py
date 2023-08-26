@@ -6,6 +6,7 @@ from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import DjangoModelPermissions, IsAuthenticated
 from djoser.views import UserViewSet as DjoserUserViewSet
+from django_filters.rest_framework import DjangoFilterBackend
 
 from api.paginators import PageLimitPagination
 from api.permissions import IsAuthorOrReadOnly
@@ -42,7 +43,8 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     """Контроллер для получения ингридиентов"""
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
-    filter_backends = (IngredientFilter,)
+    pagination_class = None
+    filterset_class = IngredientFilter
 
 
 class RecipeViewSet(
