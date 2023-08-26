@@ -214,9 +214,20 @@ class RecipeSerializer(serializers.ModelSerializer):
         )
 
 
+class RecipeReadSerializer(RecipeSerializer):
+    image = serializers.SerializerMethodField(
+        'get_image_url',
+        read_only=True,
+    )
+
+    def get_image_url(self, obj):
+        if obj.image:
+            return obj.image.url
+        return None
+
+
 class ReadRecipeSerializer(serializers.ModelSerializer):
-    """Сериализатор для модели Recipe.
-    Определён укороченный набор полей для некоторых эндпоинтов.
+    """Сериализатор модели Recipe для сериалайзера модели Follow.
     """
     image = serializers.SerializerMethodField(
         'get_image_url',

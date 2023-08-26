@@ -25,6 +25,7 @@ from .serializers import (
     IngredientSerializer,
     RecipeSerializer,
     ReadRecipeSerializer,
+    RecipeReadSerializer,
     FollowSerializer
 )
 
@@ -56,6 +57,11 @@ class RecipeViewSet(
     relation_serializer = ReadRecipeSerializer
     permission_classes = (IsAuthorOrReadOnly,)
     pagination_class = PageLimitPagination
+
+    def get_serializer_class(self):
+        if self.action in ['list', 'retrieve']:
+            return RecipeReadSerializer
+        return RecipeSerializer
 
     def get_queryset(self):
         user = self.request.user
