@@ -12,6 +12,7 @@ from api.permissions import IsAuthorOrReadOnly
 from api.core.mixins import AddOrDeleteRelationForUserViewMixin
 from api.core.utils import get_shoping_cart
 from users.models import Follow
+from api.filters import IngredientFilter
 from recipes.models import (
     Tag,
     Ingredient,
@@ -42,7 +43,7 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     filter_backends = (filters.SearchFilter,)
-    search_fields = ('^name',)
+    filterset_class = IngredientFilter
 
 
 class RecipeViewSet(
