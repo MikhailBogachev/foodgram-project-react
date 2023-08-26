@@ -19,7 +19,8 @@ ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
     'backend',
-    # '51.250.25.224',
+    '158.160.75.230',
+    'ypfoodgrambm.sytes.net',
     'db'
 ]
 
