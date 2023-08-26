@@ -42,8 +42,7 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     """Контроллер для получения ингридиентов"""
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
-    filter_backends = (filters.SearchFilter,)
-    filterset_class = IngredientFilter
+    filter_backends = (IngredientFilter,)
 
 
 class RecipeViewSet(
