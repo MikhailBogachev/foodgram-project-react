@@ -116,8 +116,8 @@ jobs:
         passphrase: ${{ secrets.SSH_PASSPHRASE }}
         script: |
           cd foodgram
-          mv /infra/docker-compose.production.yml .
-          mv /infra/nginx.conf .
+          mv infra/docker-compose.production.yml .
+          mv infra/nginx.conf .
           rm infra/
           sudo docker compose -f docker-compose.production.yml pull
           sudo docker compose -f docker-compose.production.yml down
