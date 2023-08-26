@@ -5,7 +5,6 @@ from rest_framework import serializers
 from django.db.models import F, QuerySet
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
-from drf_extra_fields.fields import Base64ImageField
 from django.contrib.auth import get_user_model
 
 from recipes.models import Tag, Ingredient, Recipe, RecipeIngredients
