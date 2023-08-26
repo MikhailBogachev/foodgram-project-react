@@ -207,6 +207,7 @@ class ReadRecipeSerializer(serializers.ModelSerializer):
     Определён укороченный набор полей для некоторых эндпоинтов.
     """
     image = serializers.ReadOnlyField(source='image.url')
+    
     class Meta:
         model = Recipe
         fields = 'id', 'name', 'image', 'cooking_time'
