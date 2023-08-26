@@ -19,8 +19,8 @@ class IngredientAdmin(admin.ModelAdmin):
 
 @admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):
-    list_display = ('pk', 'name', 'hex_code', 'slug')
-    list_editable = ('name', 'hex_code', 'slug')
+    list_display = ('pk', 'name', 'color', 'slug')
+    list_editable = ('name', 'color', 'slug')
     empty_value_display = '-пусто-'
 
 
