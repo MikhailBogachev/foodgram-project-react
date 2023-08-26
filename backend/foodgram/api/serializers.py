@@ -206,6 +206,16 @@ class ReadRecipeSerializer(serializers.ModelSerializer):
     """Сериализатор для модели Recipe.
     Определён укороченный набор полей для некоторых эндпоинтов.
     """
+    image = serializers.SerializerMethodField(
+        'get_image_url',
+        read_only=True,
+    )
+
+    def get_image_url(self, obj):
+        if obj.image:
+            return obj.image.url
+        return None
+
     class Meta:
         model = Recipe
         fields = 'id', 'name', 'image', 'cooking_time'
