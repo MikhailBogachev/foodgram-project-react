@@ -7,10 +7,11 @@ from rest_framework.decorators import action
 from rest_framework.permissions import DjangoModelPermissions, IsAuthenticated
 from djoser.views import UserViewSet as DjoserUserViewSet
 
+from foodgram.core.config import Constans
 from api.paginators import PageLimitPagination
 from api.permissions import IsAuthorOrReadOnly
-from api.core.mixins import AddOrDeleteRelationForUserViewMixin
-from api.core.utils import get_shoping_cart
+from mixins import AddOrDeleteRelationForUserViewMixin
+from utils import get_shoping_cart
 from users.models import Follow
 from api.filters import IngredientFilter
 from recipes.models import (
@@ -52,7 +53,6 @@ class RecipeViewSet(
     AddOrDeleteRelationForUserViewMixin
 ):
     """Контроллер для работы с рецептами"""
-    queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
     relation_serializer = ReadRecipeSerializer
     permission_classes = (IsAuthorOrReadOnly,)
@@ -65,7 +65,7 @@ class RecipeViewSet(
 
     def get_queryset(self):
         user = self.request.user
-        queryset = self.queryset
+        queryset = Recipe.objects.all()
 
         author_id = self.request.query_params.get('author')
         list_tags = self.request.query_params.getlist('tags')
@@ -79,9 +79,9 @@ class RecipeViewSet(
             queryset = queryset.filter(tags__slug__in=list_tags)
         if user.is_anonymous:
             return queryset
-        if is_favorited == '1':
+        if is_favorited == Constans.POSITIVE_FLAG:
             queryset = queryset.filter(in_favorites__user=user)
-        if is_in_shopping_cart == '1':
+        if is_in_shopping_cart == Constans.POSITIVE_FLAG:
             queryset = queryset.filter(in_carts__user=user)
         return queryset
 

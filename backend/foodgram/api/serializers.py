@@ -67,11 +67,6 @@ class UserSerializer(serializers.ModelSerializer):
         Returns:
             bool: True - подписка есть, False - нет.
         """
-        # user = self.context.get('view').request.user
-        # if user.is_anonymous or user == author:
-        #     return False
-        # return True
-        print(self.context['request'].user)
         if (self.context.get('request')
            and not self.context['request'].user.is_anonymous):
             return Follow.objects.filter(
@@ -215,6 +210,7 @@ class RecipeSerializer(serializers.ModelSerializer):
 
 
 class RecipeReadSerializer(RecipeSerializer):
+    """Сериалайзер модели Recipe для Safe methods"""
     image = serializers.SerializerMethodField(
         'get_image_url',
         read_only=True,
@@ -227,8 +223,7 @@ class RecipeReadSerializer(RecipeSerializer):
 
 
 class ReadRecipeSerializer(serializers.ModelSerializer):
-    """Сериализатор модели Recipe для сериалайзера модели Follow.
-    """
+    """Сериализатор модели Recipe для сериалайзера модели Follow."""
     image = serializers.SerializerMethodField(
         'get_image_url',
         read_only=True,
