@@ -2,6 +2,8 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+from foodgram.core.config import Constans
+
 
 class User(AbstractUser):
     """Моделб пользователей"""
@@ -10,11 +12,11 @@ class User(AbstractUser):
     )
     first_name = models.CharField(
         _('first name'),
-        max_length=150
+        max_length=Constans.LENGTH_CHAR_FIELD_100
     )
     last_name = models.CharField(
         _('last name'),
-        max_length=150
+        max_length=Constans.LENGTH_CHAR_FIELD_100
     )
 
     class Meta:

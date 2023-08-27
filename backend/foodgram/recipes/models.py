@@ -1,5 +1,8 @@
 from django.db import models
 from django.contrib.auth import get_user_model
+from colorfield.fields import ColorField
+
+from foodgram.core.config import Constans
 
 
 User = get_user_model()
@@ -8,11 +11,11 @@ User = get_user_model()
 class Tag(models.Model):
     """Теги"""
     name = models.CharField(
-        max_length=100,
+        max_length=Constans.LENGTH_CHAR_FIELD_100,
         verbose_name='Тег'
     )
-    color = models.CharField(
-        max_length=10,
+    color = ColorField(
+        default=Constans.DEFAULT_COLOR_FOR_TAG,
         verbose_name='Цветовой HEX-код'
     )
     slug = models.SlugField(
@@ -30,11 +33,11 @@ class Tag(models.Model):
 class Ingredient(models.Model):
     """Ингредиенты"""
     name = models.CharField(
-        max_length=100,
+        max_length=Constans.LENGTH_CHAR_FIELD_100,
         verbose_name='Название ингридиента'
     )
     measurement_unit = models.CharField(
-        max_length=20,
+        max_length=Constans.LENGTH_CHAR_FIELD_20,
         verbose_name='Единица измерения'
     )
 
@@ -55,7 +58,7 @@ class Recipe(models.Model):
         verbose_name='Автор'
     )
     name = models.CharField(
-        max_length=100,
+        max_length=Constans.LENGTH_CHAR_FIELD_100,
         verbose_name='Название'
     )
     image = models.ImageField(
