@@ -1,6 +1,6 @@
 from rest_framework.pagination import PageNumberPagination
 
-from foodgram.core.config import Constans
+from core.config import Constans
 
 
 class PageLimitPagination(PageNumberPagination):

@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth import get_user_model
 from colorfield.fields import ColorField
 
-from foodgram.core.config import Constans
+from core.config import Constans
 
 
 User = get_user_model()

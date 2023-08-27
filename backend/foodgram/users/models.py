@@ -2,7 +2,7 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from foodgram.core.config import Constans
+from core.config import Constans
 
 
 class User(AbstractUser):

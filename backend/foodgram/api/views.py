@@ -7,11 +7,11 @@ from rest_framework.decorators import action
 from rest_framework.permissions import DjangoModelPermissions, IsAuthenticated
 from djoser.views import UserViewSet as DjoserUserViewSet
 
-from foodgram.core.config import Constans
+from core.config import Constans
 from api.paginators import PageLimitPagination
 from api.permissions import IsAuthorOrReadOnly
-from mixins import AddOrDeleteRelationForUserViewMixin
-from utils import get_shoping_cart
+from .mixins import AddOrDeleteRelationForUserViewMixin
+from .utils import get_shoping_cart
 from users.models import Follow
 from api.filters import IngredientFilter
 from recipes.models import (
