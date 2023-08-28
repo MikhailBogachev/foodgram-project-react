@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth import get_user_model
+from django.core.validators import MaxValueValidator, MinValueValidator
 from colorfield.fields import ColorField
 
 from core.config import Constans
@@ -75,7 +76,18 @@ class Recipe(models.Model):
         verbose_name='Тег рецепта',
         related_name='recipes'
     )
-    cooking_time = models.IntegerField()
+    cooking_time = models.IntegerField(
+        validators=(
+            MinValueValidator(
+                Constans.MIN_COOKING_TIME,
+                "Ваше блюдо уже готово!",
+            ),
+            MaxValueValidator(
+                Constans.MAX_COOKING_TIME,
+                "Очень долго ждать...",
+            ),
+        ),
+    )
     pub_date = models.DateTimeField(
         verbose_name="Дата публикации",
         auto_now_add=True,

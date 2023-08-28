@@ -245,6 +245,7 @@ class FollowSerializer(UserSerializer):
 
     recipes = ReadRecipeSerializer(many=True, read_only=True)
     recipes_count = serializers.SerializerMethodField()
+    is_subscribed = serializers.BooleanField(True)
 
     class Meta:
         model = User
@@ -259,17 +260,6 @@ class FollowSerializer(UserSerializer):
             "recipes_count",
         )
         read_only_fields = ("__all__",)
-
-    def get_is_subscribed(*args) -> bool:
-        """Проверка подписки пользователей.
-
-        Переопределённый метод родительского класса для уменьшения нагрузки,
-        так как в текущей реализации всегда вернёт `True`.
-
-        Returns:
-            bool: True
-        """
-        return True
 
     def get_recipes_count(self, author: User) -> int:
         """Получить кол-во рецептов автора.

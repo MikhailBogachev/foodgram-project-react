@@ -18,3 +18,7 @@ class Constans:
 
     # Кол-во объект на странице для пагинации
     PAGE_SIZE = os.getenv('PAGE_SIZE', 20)
+
+    # Значения времени приготовления рецептов
+    MIN_COOKING_TIME = 1
+    MAX_COOKING_TIME = 3000

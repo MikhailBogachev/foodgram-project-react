@@ -72,11 +72,11 @@ class RecipeViewSet(
         is_favorited = self.request.query_params.get('is_favorited')
         is_in_shopping_cart = self.request.query_params.get(
             'is_in_shopping_cart')
-
+        print(list_tags, '##№')
         if author_id:
             queryset = queryset.filter(author=author_id)
         if list_tags:
-            queryset = queryset.filter(tags__slug__in=list_tags)
+            queryset = queryset.filter(tags__slug__in=list_tags).distinct()
         if user.is_anonymous:
             return queryset
         if is_favorited == Constans.POSITIVE_FLAG:
@@ -159,7 +159,7 @@ class UserViewSet(DjoserUserViewSet, AddOrDeleteRelationForUserViewMixin):
     @action(methods=("get",), detail=False,
             permission_classes=(IsAuthenticated,))
     def subscriptions(self, request) -> Response:
-        """Получить список покупок"""
+        """Получить список подписок"""
         pages = self.paginate_queryset(
             User.objects.filter(following__user=self.request.user)
         )

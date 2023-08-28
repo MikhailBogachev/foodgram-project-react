@@ -23,7 +23,7 @@ class AddOrDeleteRelationForUserViewMixin:
             entry.save()
         except IntegrityError:
             return Response(
-                data={"error": "Связь уже сущветвует"},
+                data={"error": "Связь уже существует"},
                 status=HTTP_400_BAD_REQUEST,
             )
         serializer = self.relation_serializer(obj)

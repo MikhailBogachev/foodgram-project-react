@@ -6,7 +6,7 @@ from core.config import Constans
 
 
 class User(AbstractUser):
-    """Моделб пользователей"""
+    """Модель пользователей"""
     email = models.EmailField(
         _('email address'),
     )
@@ -25,6 +25,7 @@ class User(AbstractUser):
 
 
 class Follow(models.Model):
+    """Модель подписок"""
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
