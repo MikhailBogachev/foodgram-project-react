@@ -18,7 +18,7 @@ class AddOrDeleteRelationForUserViewMixin:
     def add_relation(self, object_id: int) -> Response:
         """Добавляет связь"""
         obj = get_object_or_404(self.queryset, pk=object_id)
-        entry = self.relation_model(None, self.request.user.pk, obj.pk,)
+        entry = self.relation_model(None, self.request.user.pk, obj.pk)
         try:
             entry.save()
         except IntegrityError:

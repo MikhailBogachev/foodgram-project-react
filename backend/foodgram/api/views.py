@@ -53,6 +53,7 @@ class RecipeViewSet(
     AddOrDeleteRelationForUserViewMixin
 ):
     """Контроллер для работы с рецептами"""
+    queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
     relation_serializer = ReadRecipeSerializer
     permission_classes = (IsAuthorOrReadOnly,)
@@ -72,7 +73,6 @@ class RecipeViewSet(
         is_favorited = self.request.query_params.get('is_favorited')
         is_in_shopping_cart = self.request.query_params.get(
             'is_in_shopping_cart')
-        print(list_tags, '##№')
         if author_id:
             queryset = queryset.filter(author=author_id)
         if list_tags:
@@ -88,9 +88,8 @@ class RecipeViewSet(
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
-    @action(detail=True)
-    def favorite(self, request, pk: int,
-                 permission_classes=(IsAuthenticated,)) -> Response:
+    @action(detail=True, permission_classes=(IsAuthenticated,))
+    def favorite(self, request, pk: int) -> Response:
         """Добавить рецепт в избранное"""
         ...
 

@@ -170,7 +170,7 @@ class RecipeSerializer(serializers.ModelSerializer):
                 raise ValidationError(
                     'Кол-во ингредиента не может быть меньше 1'
                 )
-            ingredients_tmp[ing['id']] = ing['amount']
+            ingredients_tmp[ing['id']] = int(ing['amount'])
         existing_ingredients = Ingredient.objects.filter(
             id__in=ingredients_tmp.keys()
         )
@@ -186,7 +186,8 @@ class RecipeSerializer(serializers.ModelSerializer):
         )
         return data
 
-    def create(self, validated_data):
+    def create(self, validated_data: dict) -> Recipe:
+        """Создание рецепта."""
         ingredients_data = validated_data.pop('ingredients')
         tags_data = validated_data.pop('tags')
         recipe = Recipe.objects.create(**validated_data)
@@ -200,6 +201,31 @@ class RecipeSerializer(serializers.ModelSerializer):
             ]
         )
         return recipe
+    
+    def update(self, instance: Recipe, validated_data: dict) -> Recipe:
+        """Обновление рецепта."""
+        ingredients_data = validated_data.pop('ingredients')
+        tags_data = validated_data.pop('tags')
+
+        for key, value in validated_data.items():
+            setattr(instance, key, value)
+
+        if tags_data:
+            instance.tags.set(tags_data)
+
+        if ingredients_data:
+            instance.ingredients.clear()
+            RecipeIngredients.objects.bulk_create(
+                [
+                    RecipeIngredients(
+                        recipe=instance, ingredient=ingredient, amount=amount
+                    )
+                    for ingredient, amount in ingredients_data.values()
+                ]
+            )
+
+        instance.save()
+        return instance
 
     class Meta:
         model = Recipe
