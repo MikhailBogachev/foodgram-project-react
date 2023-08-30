@@ -201,7 +201,7 @@ class RecipeSerializer(serializers.ModelSerializer):
             ]
         )
         return recipe
-    
+
     def update(self, instance: Recipe, validated_data: dict) -> Recipe:
         """Обновление рецепта."""
         ingredients_data = validated_data.pop('ingredients')
